@@ -177,8 +177,9 @@ int main(int argc, char* argv[]) {
         const int dat_size = dat_sizes[cat];
         const double completion_rate = ((double)romset_size/dat_size * 100);
 
-        std::cout << cat << " is " << completion_rate << "% complete ["
-                  << romset_size << "/" << dat_size << "]" << std::endl;
+        std::cout << std::setw(10) << std::left << cat
+                  << std::setw(8) << std::right << std::setprecision(4) << completion_rate << "%"
+                  << std::setw(10) << romset_size << "/" << dat_size << std::endl;
     }
     return 0;
 }
