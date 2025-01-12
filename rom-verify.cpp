@@ -112,12 +112,12 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> cats = {
         "Japan",
         "USA",
-        "Europe",
-        "China",
-        "Asia",
-        "(Beta)"
+        // "Europe",
+        // "China",
+        // "Asia",
+        // "(Beta)"
     };
-    // cat : (rom : crc)
+    // cat : (crc : rom)
     std::unordered_map<std::string,
                        std::unordered_map<std::string, std::string>> dats;
     // cat : romset
@@ -152,6 +152,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // print results, write missing roms to MISSING
+    std::unordered_set<std::string> missing;
     for (const auto& cat : cats) {
         const int romset_size = romsets[cat].size();
         const int dat_size = dat_sizes[cat];
@@ -160,6 +162,16 @@ int main(int argc, char* argv[]) {
         std::cout << std::setw(10) << std::left << cat
                   << std::setw(8) << std::right << std::setprecision(4) << completion_rate << "%"
                   << std::setw(10) << romset_size << "/" << dat_size << std::endl;
+
+        for (const auto& rom_map : dats[cat]) {
+            std::string rom = "(" + rom_map.first + ") " + rom_map.second;
+            missing.insert(rom);
+        }
     }
+    // print missing roms
+    // for (const auto& rom : missing) {
+    //     std::cout << rom << std::endl;
+    // }
+
     return 0;
 }
