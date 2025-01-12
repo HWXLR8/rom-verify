@@ -16,10 +16,10 @@ IGNORE = []
 CATEGORIES = [
     'Japan',
     'USA',
-    'Europe',
-    'China',
-    'Asia',
-    '(Beta)'
+    # 'Europe',
+    # 'China',
+    # 'Asia',
+    # '(Beta)'
 ]
 
 def find_roms(dir, ignore=[]):
@@ -31,7 +31,7 @@ def find_roms(dir, ignore=[]):
     return roms
 
 def parse_dat(cat):
-    tree = etree.parse('nes.dat')
+    tree = etree.parse('../nes.dat')
     root = tree.getroot()
     game_crc = {}
     for game in root.findall('game'):
