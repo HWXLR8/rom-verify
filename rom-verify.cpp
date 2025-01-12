@@ -104,18 +104,18 @@ void check_rom(const std::string& rom,
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cout << "Usage: rom-verify [ROM_PATH]" << std::endl;
+    if (argc < 3) {
+        std::cout << "Usage: rom-verify [ROM_PATH] [JOBS]" << std::endl;
         return 1;
     }
 
     std::vector<std::string> cats = {
         "Japan",
         "USA",
-        // "Europe",
-        // "China",
-        // "Asia",
-        // "(Beta)"
+        "Europe",
+        "China",
+        "Asia",
+        "(Beta)"
     };
     // cat : (rom : crc)
     std::unordered_map<std::string,
@@ -136,12 +136,12 @@ int main(int argc, char* argv[]) {
     }
 
     // search rompath for roms
-    std::string rompath = "myrient";
+    std::string rompath = argv[1];
     std::vector<std::string> roms;
     find_roms(rompath, roms);
 
     // thread shit
-    const size_t max_threads = 32;
+    const size_t max_threads = std::stoi(argv[2]);
     std::vector<std::thread> threads;
     for (const auto& cat : cats) {
         for (const auto& rom : roms) {
