@@ -1,8 +1,8 @@
 #include <filesystem>
+#include <future>
 #include <iostream>
 #include <mutex>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -104,8 +104,8 @@ void check_rom(const std::string& rom,
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        std::cout << "Usage: rom-verify [ROM_PATH] [JOBS]" << std::endl;
+    if (argc < 2) {
+        std::cout << "Usage: rom-verify [ROM_PATH]" << std::endl;
         return 1;
     }
 
@@ -140,35 +140,15 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> roms;
     find_roms(rompath, roms);
 
-    // thread shit
-    const size_t max_threads = std::stoi(argv[2]);
-    std::vector<std::thread> threads;
     for (const auto& cat : cats) {
+        std::vector<std::future<void>> futures;
         for (const auto& rom : roms) {
-            if (threads.size() != max_threads) {
-                threads.push_back(std::thread(check_rom,
-                                              rom,
-                                              cat,
-                                              std::ref(dats),
-                                              std::ref(romsets)));
-            }
-            // start joining threads once the pool is maxxed out
-            if (threads.size() == max_threads) {
-                for (auto it = threads.begin(); it != threads.end(); ) {
-                    if (it->joinable()) {
-                        it->join();
-                        it = threads.erase(it);
-                    } else {
-                        ++it;
-                    }
-                }
-            }
+            futures.push_back
+                (std::async
+                 (std::launch::async, check_rom, rom, cat, std::ref(dats), std::ref(romsets)));
         }
-        // join all remaining threads
-        for (auto& t : threads) {
-            if (t.joinable()) {
-                t.join();
-            }
+        for (auto& f : futures) {
+            f.get();
         }
     }
 
