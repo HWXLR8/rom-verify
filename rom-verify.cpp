@@ -60,7 +60,10 @@ void check_rom(const std::string& rom,
         int err = 0;
         zip* z = zip_open(rom.c_str(), ZIP_RDONLY, &err);
         if (!z) {
-            std::cout << "Failed to unzip " << rom << ", skipping." << std::endl;
+            zip_error_t error;
+            zip_error_init_with_code(&error, err);
+            std::cout << "Failed to unzip " << rom << ": " << zip_error_strerror(&error) << std::endl;
+            zip_error_fini(&error);
             return;
         }
 
@@ -127,7 +130,7 @@ int main(int argc, char* argv[]) {
     // split the dat into seperate dats for each cat
     for (const auto& cat : cats) {
         std::unordered_map<std::string, std::string> rom_crc;
-        parse_dat("nes.dat", cat, rom_crc);
+        parse_dat("DAT/nes.dat", cat, rom_crc);
         // capture the original size of the dat before we remove items
         dat_sizes[cat] = rom_crc.size();
         dats[cat] = rom_crc;
