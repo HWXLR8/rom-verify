@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <tinyxml2.h>
+#include <yaml-cpp/yaml.h>
 #include <zip.h>
 #include <zlib.h>
 
@@ -107,11 +108,6 @@ void check_rom(const std::string& rom,
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cout << "Usage: rom-verify [ROM_PATH]" << std::endl;
-        return 1;
-    }
-
     std::vector<std::string> cats = {
         "Japan",
         "USA",
@@ -130,7 +126,7 @@ int main(int argc, char* argv[]) {
     // split the dat into seperate dats for each cat
     for (const auto& cat : cats) {
         std::unordered_map<std::string, std::string> rom_crc;
-        parse_dat("DAT/nes.dat", cat, rom_crc);
+        parse_dat("dat/nes.dat", cat, rom_crc);
         // capture the original size of the dat before we remove items
         dat_sizes[cat] = rom_crc.size();
         dats[cat] = rom_crc;
@@ -138,8 +134,17 @@ int main(int argc, char* argv[]) {
         romsets[cat] = std::unordered_set<std::string>();
     }
 
+    // parse config
+    YAML::Node conf = YAML::LoadFile("rom.yaml");
+    YAML::Node paths = conf["console"]["nes"]["path"];
+    std::string rompath;
+    if (paths && paths.IsSequence() && paths.size() > 0) {
+        std::string rompath = paths[0].as<std::string>();
+    } else {
+        throw std::runtime_error("no valid rom path found, check rom.yaml");
+    }
     // search rompath for roms
-    std::string rompath = argv[1];
+    rompath = paths[0].as<std::string>();
     std::vector<std::string> roms;
     find_roms(rompath, roms);
 
