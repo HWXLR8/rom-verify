@@ -137,16 +137,16 @@ int main(int argc, char* argv[]) {
     // parse config
     YAML::Node conf = YAML::LoadFile("rom.yaml");
     YAML::Node paths = conf["console"]["nes"]["path"];
+    std::vector<std::string> roms;
     std::string rompath;
     if (paths && paths.IsSequence() && paths.size() > 0) {
-        std::string rompath = paths[0].as<std::string>();
+        for (const auto& path : paths) {
+            std::string rompath = path.as<std::string>();
+            find_roms(rompath, roms);
+        }
     } else {
         throw std::runtime_error("no valid rom path found, check rom.yaml");
     }
-    // search rompath for roms
-    rompath = paths[0].as<std::string>();
-    std::vector<std::string> roms;
-    find_roms(rompath, roms);
 
     for (const auto& cat : cats) {
         std::vector<std::future<void>> futures;
