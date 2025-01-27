@@ -12,8 +12,13 @@
 Console::Console(const std::string& name) {
     name_ = name;
 
-    // load romdirs from config
+    load_config();
+}
+
+void Console::load_config() {
     YAML::Node conf = YAML::LoadFile("rom.yaml");
+
+    // dirs
     YAML::Node dirs = conf["console"][name_]["dirs"];
     if (dirs && dirs.IsSequence() && dirs.size() > 0) {
         for (const auto& dir : dirs) {
@@ -24,27 +29,24 @@ Console::Console(const std::string& name) {
         throw std::runtime_error("no valid rom directory found, check rom.yaml");
     }
 
-    // TODO: move to YAML
-    cats_ = {
-        "Japan",
-        "USA",
-        // "Europe",
-        // "China",
-        // "Asia",
-        // "(Beta)"
-    };
-    // TODO: move to YAML
-    dat_file_ = "dat/nes.dat";
+    // cats
+    YAML::Node categories = conf["console"][name_]["categories"];
+    if (categories && categories.IsSequence() && categories.size() > 0) {
+        for (const auto& category : categories) {
+            std::string cat = category.as<std::string>();
+            cats_.push_back(cat);
+        }
+    } else {
+        throw std::runtime_error("no valid categories found, check rom.yaml");
+    }
 
-    // split the dat into seperate dats for each cat
-    for (const auto& cat : cats_) {
-        std::unordered_map<std::string, std::string> rom_crc;
-        parse_dat(cat, rom_crc);
-        // capture the original size of the dat before we remove items
-        dat_sizes_[cat] = rom_crc.size();
-        dats_[cat] = rom_crc;
-        // initialize empty romset for each cat
-        romsets_[cat] = std::unordered_set<std::string>();
+    // dat
+    YAML::Node dat = conf["console"][name_]["dat"];
+
+    if (dat && dat.IsSequence() && dat.size() > 0) {
+        dat_file_ = dat[0].as<std::string>();
+    } else {
+        throw std::runtime_error("no valid dat file found, check rom.yaml");
     }
 }
 
@@ -60,27 +62,35 @@ void Console::find_roms() {
     }
 }
 
-void Console::parse_dat(std::string cat, std::unordered_map<std::string, std::string>& rom_crc) {
-    tinyxml2::XMLDocument dat;
-    dat.LoadFile(dat_file_.c_str());
-    tinyxml2::XMLElement* root = dat.RootElement();
+void Console::parse_dat() {
+    // split the dat into seperate dats for each cat
+    for (const auto& cat : cats_) {
+        std::unordered_map<std::string, std::string> rom_crc;
 
-    for (tinyxml2::XMLElement* game = root->FirstChildElement("game");
-         game != nullptr;
-         game = game->NextSiblingElement("game")) {
-        const char* name = game->Attribute("name");
-
-        // filter based on category
-        if (std::string(name).find(cat) == std::string::npos) {
-            continue;
+        // we start with a fresh dat each time since there may be
+        // overlap between categories.
+        tinyxml2::XMLDocument dat;
+        dat.LoadFile(dat_file_.c_str());
+        tinyxml2::XMLElement* root = dat.RootElement();
+        for (tinyxml2::XMLElement* game = root->FirstChildElement("game");
+             game != nullptr;
+             game = game->NextSiblingElement("game")) {
+            const char* name = game->Attribute("name");
+            // filter based on category
+            if (std::string(name).find(cat) == std::string::npos) {
+                continue;
+            }
+            tinyxml2::XMLElement* rom = game->FirstChildElement("rom");
+            const char* crc = rom->Attribute("crc");
+            rom_crc[crc] = name;
         }
 
-        tinyxml2::XMLElement* rom = game->FirstChildElement("rom");
-        const char* crc = rom->Attribute("crc");
-
-        rom_crc[crc] = name;
+        // capture the original size of the dat before we remove items
+        dat_sizes_[cat] = rom_crc.size();
+        dats_[cat] = rom_crc;
+        // initialize empty romset for each cat
+        romsets_[cat] = std::unordered_set<std::string>();
     }
-
 }
 
 void Console::process_roms() {

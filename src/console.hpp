@@ -10,13 +10,15 @@ class Console {
 public:
     Console(const std::string& name);
     void find_roms();
-    void parse_dat(std::string cat, std::unordered_map<std::string, std::string>& rom_crc);
+    void parse_dat();
     void process_roms();
     void check_rom(const std::string& rom, const std::string& cat);
     void print_results();
     void print_missing();
 
 private:
+    void load_config();
+
     std::string name_;
     std::string dat_file_;
     std::vector<std::string> romdirs_;

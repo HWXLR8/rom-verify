@@ -1,4 +1,11 @@
 console:
   nes:
-    path:
+    dat:
+      - dat/nes.dat
+    dirs:
       - Nintendo - Nintendo Entertainment System (Headered)
+      - Nintendo - Nintendo Entertainment System (Headered) (Private)
+    categories:
+      - "Japan"
+      - "USA"
+      - "Europe"
