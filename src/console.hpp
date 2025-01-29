@@ -6,9 +6,11 @@
 #include <unordered_set>
 #include <vector>
 
+#include "config.hpp"
+
 class Console {
 public:
-    Console(const std::string& name);
+    Console(const std::string& name, Config* conf);
     void find_roms();
     void parse_dat();
     void process_roms();
@@ -16,7 +18,6 @@ public:
     void print_missing();
 
 private:
-    void load_config();
     void print_progress(const std::string& desc, int current, int total);
 
     std::string name_;

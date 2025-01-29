@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -O3
+CXXFLAGS = -std=c++20 -Wall -O3
 LDFLAGS = -ltinyxml2 -lyaml-cpp -lz -lzip
 
 SRCS = $(wildcard src/*.cpp)

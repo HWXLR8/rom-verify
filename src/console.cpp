@@ -5,49 +5,15 @@
 #include <iostream>
 
 #include <tinyxml2.h>
-#include <yaml-cpp/yaml.h>
 #include <zip.h>
 #include <zlib.h>
 
-Console::Console(const std::string& name) {
+Console::Console(const std::string& name, Config* conf) {
     name_ = name;
 
-    load_config();
-}
-
-void Console::load_config() {
-    YAML::Node conf = YAML::LoadFile("rom.yaml");
-
-    // dirs
-    YAML::Node dirs = conf["console"][name_]["dirs"];
-    if (dirs && dirs.IsSequence() && dirs.size() > 0) {
-        for (const auto& dir : dirs) {
-            std::string romdir = dir.as<std::string>();
-            romdirs_.push_back(romdir);
-        }
-    } else {
-        throw std::runtime_error("no valid rom directory found, check rom.yaml");
-    }
-
-    // cats
-    YAML::Node categories = conf["console"][name_]["categories"];
-    if (categories && categories.IsSequence() && categories.size() > 0) {
-        for (const auto& category : categories) {
-            std::string cat = category.as<std::string>();
-            cats_.push_back(cat);
-        }
-    } else {
-        throw std::runtime_error("no valid categories found, check rom.yaml");
-    }
-
-    // dat
-    YAML::Node dat = conf["console"][name_]["dat"];
-
-    if (dat && dat.IsSequence() && dat.size() > 0) {
-        dat_file_ = dat[0].as<std::string>();
-    } else {
-        throw std::runtime_error("no valid dat file found, check rom.yaml");
-    }
+    dat_file_ = conf->get_datfile(name);
+    romdirs_ = conf->get_romdirs(name);
+    cats_ = conf->get_cats(name);
 }
 
 void Console::find_roms() {
