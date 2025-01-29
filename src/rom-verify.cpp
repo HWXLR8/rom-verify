@@ -5,6 +5,5 @@ int main(int argc, char* argv[]) {
     nes->parse_dat();
     nes->find_roms();
     nes->process_roms();
-    nes->print_results();
     return 0;
 }

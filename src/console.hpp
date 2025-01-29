@@ -13,11 +13,11 @@ public:
     void parse_dat();
     void process_roms();
     void check_rom(const std::string& rom, const std::string& cat);
-    void print_results();
     void print_missing();
 
 private:
     void load_config();
+    void print_progress(const std::string& desc, int current, int total);
 
     std::string name_;
     std::string dat_file_;

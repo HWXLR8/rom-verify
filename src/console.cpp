@@ -105,9 +105,12 @@ void Console::process_roms() {
                   }
                   ));
         }
+        const auto ds = dat_sizes_[cat];
         for (auto& f : futures) {
+            print_progress(cat, romsets_[cat].size(), ds);
             f.get();
         }
+        std::cout << std::endl;
     }
 }
 
@@ -164,26 +167,36 @@ void Console::check_rom(const std::string& rom, const std::string& cat) {
     }
 }
 
-void Console::print_results() {
-    for (const auto& cat : cats_) {
-        const int romset_size = romsets_[cat].size();
-        const int dat_size = dat_sizes_[cat];
-        const double completion_rate = ((double)romset_size/dat_size * 100);
-
-        std::cout << std::setw(10) << std::left << cat
-                  << std::setw(8) << std::right << std::setprecision(4) << completion_rate << "%"
-                  << std::setw(10) << romset_size << "/" << dat_size << std::endl;
-
-        for (const auto& rom_map : dats_[cat]) {
-            std::string rom = "(" + rom_map.first + ") " + rom_map.second;
-            missing_.insert(rom);
-        }
-    }
-}
-
-
 void Console::print_missing() {
     for (const auto& rom : missing_) {
         std::cout << rom << std::endl;
     }
+}
+
+void Console::print_progress(const std::string& desc, int current, int total) {
+    const int bar_width = 40;
+    const int desc_width = 8; // Fixed width for description
+    float progress = static_cast<float>(current) / total;
+    int pos = static_cast<int>(bar_width * progress);
+
+    std::cout << "\r ";
+    std::cout << std::left << std::setw(desc_width) << desc.substr(0, desc_width);
+    std::cout << "[";
+
+    // green filled area
+    std::cout << "\033[32m";
+    for (int i = 0; i < pos; ++i) {
+        std::cout << "━";
+    }
+
+    // red unfilled area
+    std::cout << "\033[31m";
+    for (int i = pos; i < bar_width; ++i) {
+        std::cout << "━";
+    }
+
+    std::cout << "\033[0m] "; // reset color, close bracket
+    std::cout << static_cast<int>(progress * 100) << "% "
+              << current << "/" << total;
+    std::cout.flush();
 }
