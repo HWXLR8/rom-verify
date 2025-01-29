@@ -1,0 +1,22 @@
+* romutil
+
+This is a simple utility for maintaining the integrity and
+completeness of your ROM collection. Currently support consoles:
+
+|---------+-------------------------------------------|
+| Console | Features/Limitations                      |
+|---------+-------------------------------------------|
+| NES     | assumes headered ROMs, in zipped archives |
+|---------+-------------------------------------------|
+
+** Dependencies
+
+Building requires the following:
+
+- C++20 compliant compiler
+- tinyxml2
+- yaml-cpp
+- libzip
+- zlib
+
+To complile the project, simply run ~make~.
